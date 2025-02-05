@@ -1,0 +1,13 @@
+[project]
+name = "optimisation-problems"
+version = "0.1.0"
+description = "Showcase optimisation problems to allow easier comparison"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "imageio>=2.37.0",
+    "matplotlib>=3.10.0",
+    "networkx>=3.4.2",
+    "numpy>=2.2.2",
+    "pulp>=2.9.0",
+]

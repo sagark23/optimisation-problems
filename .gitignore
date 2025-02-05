@@ -1,0 +1,5 @@
+.idea/
+__pycache__/
+problem_1/outputs/**
+
+.DS_Store
