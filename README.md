@@ -12,8 +12,10 @@ brew install uv
 ## How to run
 
 ```shell
+# Linear programming
 uv run optimise_problem_1_simple.py
 uv run optimise_problem_1_extensible.py --input-file problem_1/simple.json
 uv run optimise_problem_1_extensible.py --input-file problem_1/complex.json
+# Genetic algorithm
 uv run optimise_problem_2.py
 ```
