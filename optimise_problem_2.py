@@ -27,6 +27,7 @@ def stop_fn(_population: list[Individual], generations: int) -> bool:
 
 
 def optimise_with_ga() -> None:
+    # TODO: Read from input JSON
     supply = np.array([2000, 3100, 100])
     demand = np.array([500, 900, 1800, 200, 700])
     cost_matrix = np.array([

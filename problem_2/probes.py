@@ -21,7 +21,7 @@ class BestFitnessLoggerProbe:
         return self._is_nth_gen(current_gen, 100)
 
     def _should_plot_best_fitness(self, current_gen: int) -> bool:
-        return self._is_nth_gen(current_gen, 10)
+        return current_gen > 0 and self._is_nth_gen(current_gen, 10)
 
     def _is_nth_gen(self, current_gen, n: int):
         return self.total_generations > n and (
@@ -79,3 +79,4 @@ class BestFitnessLoggerProbe:
         plt.ylim(y_min, y_max)
         plt.legend()
         plt.show()
+        # TODO: Write graph to file
