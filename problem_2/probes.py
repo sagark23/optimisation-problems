@@ -2,7 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from leap_ec import context, Individual
 
-from problem_2.utils import find_best_solution
+
+def find_best_solution(population: list[Individual], n) -> list[Individual]:
+    return sorted(population, key=lambda x: x.fitness)[:n]
 
 
 class BestFitnessLoggerProbe:
@@ -35,19 +37,20 @@ class BestFitnessLoggerProbe:
             context['track'] = {'solutions': [], 'best_entry': {'best_individual_in_gen': default, 'generation': -1}}
 
         fittest_n = find_best_solution(population, self.elite_retention_count)
-        fittest = fittest_n[0]
+        fittest_in_gen = fittest_n[0]
         current_entry = {
             'generation': current_gen_num,
-            'best_individual_in_gen': fittest,
+            'best_individual_in_gen': fittest_in_gen,
+            'best_individual': context['track']['best_entry']['best_individual_in_gen'],
             'avg_top_n_fitness': sum([x.fitness for x in fittest_n]) / len(fittest_n)
         }
-        if fittest.fitness < context['track']['best_entry']['best_individual_in_gen'].fitness:
+        if fittest_in_gen.fitness < context['track']['best_entry']['best_individual_in_gen'].fitness:
+            current_entry['best_individual_in_gen'] = fittest_in_gen
             context['track']['best_entry'] = current_entry
-        current_entry['best_individual'] = context['track']['best_entry']['best_individual_in_gen']
         context['track']['solutions'] = context['track']['solutions'] + [current_entry]
 
         if self._should_print_best_fitness(current_gen_num):
-            print(f'Best fitness from [{current_gen_num}]: {fittest.fitness} '
+            print(f'Best fitness from [{current_gen_num}]: {fittest_in_gen.fitness} '
                   f'(avg top n fitness: {current_entry["avg_top_n_fitness"]}) | '
                   f'Best fitness so far[{context["track"]["best_entry"]["generation"]}]: '
                   f'{context["track"]["best_entry"]["best_individual_in_gen"].fitness}')
@@ -58,10 +61,10 @@ class BestFitnessLoggerProbe:
         return population
 
     def create_plot(self) -> None:
-        all_fittest_of_gen = [x['best_individual_in_gen'].fitness for x in context['track']['solutions']]
         all_generations = [x['generation'] for x in context['track']['solutions']]
-        fittest_of_all_time = [x['best_individual'].fitness for x in context['track']['solutions']]
         all_avg_top_n_fitness = [x['avg_top_n_fitness'] for x in context['track']['solutions']]
+        all_fittest_of_gen = [x['best_individual_in_gen'].fitness for x in context['track']['solutions']]
+        fittest_of_all_time = [x['best_individual'].fitness for x in context['track']['solutions']]
         y_min = min(all_fittest_of_gen) * self.min_fitness_plot_percentage
         y_max = np.percentile(all_fittest_of_gen, self.max_fitness_plot_percentile)
 
