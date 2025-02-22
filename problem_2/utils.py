@@ -2,8 +2,8 @@ import numpy as np
 from leap_ec import Individual, context
 
 
-def find_best_solution(population: list[Individual]) -> Individual:
-    return min(population)
+def find_best_solution(population: list[Individual], n) -> list[Individual]:
+    return sorted(population, key=lambda x: x.fitness)[:n]
 
 
 def process_result(supply: np.ndarray, demand: np.ndarray) -> None:

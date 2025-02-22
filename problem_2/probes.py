@@ -6,10 +6,11 @@ from problem_2.utils import find_best_solution
 
 
 class BestFitnessLoggerProbe:
-    def __init__(self, total_generations: int):
+    def __init__(self, total_generations: int, elite_retention_count: int):
         self.total_generations = total_generations
         self.min_fitness_plot_percentage = 0.9
         self.max_fitness_plot_percentile = 98
+        self.elite_retention_count = elite_retention_count
 
     def _is_last_gen(self, current_gen: int):
         return current_gen == self.total_generations - 1
@@ -31,16 +32,25 @@ class BestFitnessLoggerProbe:
         if context.get('track') is None:
             default = Individual(None)
             default.fitness = float('inf')
-            context['track'] = {'solutions': [], 'best_entry': {'best_individual': default, 'generation': 0}}
+            context['track'] = {'solutions': [], 'best_entry': {'best_individual_in_gen': default, 'generation': -1}}
 
-        fittest = find_best_solution(population)
-        current_entry = {'generation': current_gen_num, 'best_individual': fittest}
-        if fittest.fitness < context['track']['best_entry']['best_individual'].fitness:
+        fittest_n = find_best_solution(population, self.elite_retention_count)
+        fittest = fittest_n[0]
+        current_entry = {
+            'generation': current_gen_num,
+            'best_individual_in_gen': fittest,
+            'avg_top_n_fitness': sum([x.fitness for x in fittest_n]) / len(fittest_n)
+        }
+        if fittest.fitness < context['track']['best_entry']['best_individual_in_gen'].fitness:
             context['track']['best_entry'] = current_entry
+        current_entry['best_individual'] = context['track']['best_entry']['best_individual_in_gen']
         context['track']['solutions'] = context['track']['solutions'] + [current_entry]
 
         if self._should_print_best_fitness(current_gen_num):
-            print(f'Best fitness from [{current_gen_num}]: {fittest.fitness} | Best fitness so far [{context["track"]["best_entry"]["generation"]}]: {context["track"]["best_entry"]["best_individual"].fitness}')
+            print(f'Best fitness from [{current_gen_num}]: {fittest.fitness} '
+                  f'(avg top n fitness: {current_entry["avg_top_n_fitness"]}) | '
+                  f'Best fitness so far[{context["track"]["best_entry"]["generation"]}]: '
+                  f'{context["track"]["best_entry"]["best_individual_in_gen"].fitness}')
 
         if self._should_plot_best_fitness(current_gen_num):
             self.create_plot()
@@ -48,15 +58,21 @@ class BestFitnessLoggerProbe:
         return population
 
     def create_plot(self) -> None:
-        all_fitness_values = [x['best_individual'].fitness for x in context['track']['solutions']]
-        y_min = min(all_fitness_values) * self.min_fitness_plot_percentage
-        y_max = np.percentile(all_fitness_values, self.max_fitness_plot_percentile)
-        plt.plot(
-            [x['generation'] for x in context['track']['solutions']],
-            all_fitness_values
-        )
+        all_fittest_of_gen = [x['best_individual_in_gen'].fitness for x in context['track']['solutions']]
+        all_generations = [x['generation'] for x in context['track']['solutions']]
+        fittest_of_all_time = [x['best_individual'].fitness for x in context['track']['solutions']]
+        all_avg_top_n_fitness = [x['avg_top_n_fitness'] for x in context['track']['solutions']]
+        y_min = min(all_fittest_of_gen) * self.min_fitness_plot_percentage
+        y_max = np.percentile(all_fittest_of_gen, self.max_fitness_plot_percentile)
+
+        plt.plot(all_generations, all_avg_top_n_fitness, label='Average Top N Fitness')
+        plt.plot(all_generations, all_fittest_of_gen, label='Best Fitness in Gen', alpha=0.8)
+        plt.plot(all_generations, fittest_of_all_time, label='Fittest of all time', color='black', alpha=0.5)
+
         plt.xlabel('Generation')
         plt.ylabel('Fitness')
         plt.title('Fitness over generations')
+        plt.gcf().set_size_inches(19.20, 10.80)
         plt.ylim(y_min, y_max)
+        plt.legend()
         plt.show()

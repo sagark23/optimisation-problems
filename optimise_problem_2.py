@@ -9,7 +9,7 @@ from leap_ec.real_rep.ops import mutate_gaussian
 
 from problem_2.probes import BestFitnessLoggerProbe
 from problem_2.problem import TransportationProblem
-from problem_2.utils import process_result, find_best_solution
+from problem_2.utils import process_result
 
 supply = np.array([2000, 3100, 100])
 demand = np.array([500, 900, 1800, 200, 700])
@@ -27,6 +27,7 @@ representation = Representation(
     decoder=IdentityDecoder(),
 )
 pop_size = 100
+elite_retention_count = round(pop_size / 2)
 generations = 20000
 
 
@@ -58,9 +59,9 @@ generational_ea(
         ),
         ops.evaluate,
         ops.pool(size=pop_size),
-        BestFitnessLoggerProbe(generations),
+        BestFitnessLoggerProbe(generations, elite_retention_count),
     ],
-    k_elites=round(pop_size / 4),
+    k_elites=elite_retention_count,
     stop=stop_fn
 )
 
