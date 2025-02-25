@@ -44,7 +44,7 @@ def optimise_with_ga() -> None:
         decoder=IdentityDecoder(),
     )
     pop_size = 100
-    elite_retention_count = round(pop_size / 2)
+    elite_retention_count = 2
     generations = 20000
 
     generational_ea(
