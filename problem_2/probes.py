@@ -10,7 +10,7 @@ def find_best_solution(population: list[Individual], n) -> list[Individual]:
 class BestFitnessLoggerProbe:
     def __init__(self, total_generations: int, elite_retention_count: int):
         self.total_generations = total_generations
-        self.min_fitness_plot_percentage = 0.9
+        self.min_fitness_plot_percentage = 0.95
         self.max_fitness_plot_percentile = 98
         self.elite_retention_count = elite_retention_count
 
