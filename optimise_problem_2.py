@@ -1,5 +1,7 @@
+import json
 import random
 from functools import partial
+from typing import TypedDict
 
 import numpy as np
 from leap_ec import ops, Representation, context, Individual
@@ -7,10 +9,12 @@ from leap_ec.algorithm import generational_ea
 from leap_ec.decoder import IdentityDecoder
 from leap_ec.ops import UniformCrossover
 from leap_ec.real_rep.ops import mutate_gaussian
+from numpy import ndarray
 
+from args_parser import cli_args
+from problem_2.outputs import process_result
 from problem_2.probes import BestFitnessLoggerProbe
 from problem_2.problem import TransportationProblem
-from problem_2.outputs import process_result
 
 
 def stop_fn(_population: list[Individual], generations: int) -> bool:
@@ -26,16 +30,22 @@ def stop_fn(_population: list[Individual], generations: int) -> bool:
     return should_stop
 
 
-def optimise_with_ga() -> None:
-    # TODO: Read from input JSON
-    supply = np.array([2000, 3100, 100])
-    demand = np.array([500, 900, 1800, 200, 700])
-    cost_matrix = np.array([
-        [20, 40, 50, 20, 10],
-        [30, 10, 30, 20, 30],
-        [10, 12, 16, 32, 14]
-    ])
+class GAInputs(TypedDict):
+    supply: ndarray
+    demand: ndarray
+    costs: ndarray
 
+
+def clean_inputs(supply: dict[str, int], demand: dict[str, int], costs: dict[str, dict[str, int]]) -> GAInputs:
+    costs_matrix: list[list[int]] = [[costs[warehouse][store] for store in demand] for warehouse in supply]
+    costs = np.array(costs_matrix)
+    supply = np.array(list(supply.values()))
+    demand = np.array(list(demand.values()))
+
+    return {"supply": supply, "demand": demand, "costs": costs}
+
+
+def optimise_with_ga(supply: ndarray[int], demand: ndarray[int], costs: ndarray[ndarray[int]]) -> None:
     num_warehouses = len(supply)
     num_stores = len(demand)
     genome_size = num_warehouses * num_stores
@@ -50,7 +60,7 @@ def optimise_with_ga() -> None:
     generational_ea(
         max_generations=generations,
         pop_size=pop_size,
-        problem=TransportationProblem(supply, demand, cost_matrix),
+        problem=TransportationProblem(supply, demand, costs),
         representation=representation,
         pipeline=[
             ops.tournament_selection(k=3),
@@ -72,4 +82,7 @@ def optimise_with_ga() -> None:
 
 
 if __name__ == '__main__':
-    optimise_with_ga()
+    args = cli_args()
+
+    with open(args.input_file) as f:
+        optimise_with_ga(**clean_inputs(**json.load(f)))
