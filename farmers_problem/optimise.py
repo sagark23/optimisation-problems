@@ -63,9 +63,9 @@ def print_results(results: dict) -> None:
     print("\nOptimization Results:")
     print(f"Status: {results['status']}")
     print("\nOptimal Planting Plan:")
-    print(f"Potato seeds to plant: {results['potato_seeds']:.2f} tons")
-    print(f"Carrot seeds to plant: {results['carrot_seeds']:.2f} tons")
-    print(f"Maximum profit: ${results['total_profit']:.2f}")
+    print(f"Potato seeds to plant: {results['potato_seeds']:.2f} kgs")
+    print(f"Carrot seeds to plant: {results['carrot_seeds']:.2f} kgs")
+    print(f"Maximum profit: £{results['total_profit']:.2f}")
 
     print("\nResource Usage:")
     print(f"Total fertilizer used: {results['fertilizer_used']:.2f} tons")
@@ -86,4 +86,5 @@ def main():
     results = solve_problem(inputs)
 
     print_results(results)
+
 

@@ -18,4 +18,4 @@ class Inputs:
 
     @property
     def crops(self):
-        return ["potato", "carrot"] 
+        return ["potato", "carrot"]
